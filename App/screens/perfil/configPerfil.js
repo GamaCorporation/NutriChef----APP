@@ -1,0 +1,158 @@
+import React, { useEffect, useState } from "react";
+import { 
+  View, Text, Image, TouchableOpacity, Alert, ScrollView, StyleSheet, Platform 
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import Header from "../../components/Voltar";
+
+export default function ConfigPerfil() {
+  const navigation = useNavigation();
+  const [usuario, setUsuario] = useState(null);
+
+  // Buscar usuário logado
+  useEffect(() => {
+    fetch("http://localhost:3001/perfil", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.usuario) {
+          setUsuario(data.usuario);
+        } else {
+          navigation.replace("CadastroLogin"); // redireciona se não logado
+        }
+      })
+      .catch((err) => {
+        console.error("Erro ao buscar usuário:", err);
+        navigation.replace("CadastroLogin");
+      });
+  }, []);
+
+  // Logout
+  const handleLogout = () => {
+    const logoutFetch = () => {
+      fetch("http://localhost:3001/nutrichef/1.0.0/logout", {
+        method: "POST",
+        credentials: "include",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) navigation.replace("CadastroLogin");
+          else alert(data.message || "Erro ao deslogar");
+        })
+        .catch((err) => console.error("Erro no logout:", err));
+    };
+
+    if (Platform.OS === "web") {
+      if (window.confirm("Tem certeza que deseja sair?")) logoutFetch();
+    } else {
+      Alert.alert(
+        "Sair",
+        "Tem certeza que deseja sair?",
+        [
+          { text: "Cancelar", style: "cancel" },
+          { text: "Sair", style: "destructive", onPress: logoutFetch },
+        ],
+        { cancelable: true }
+      );
+    }
+  };
+
+  if (!usuario) {
+    return (
+      <View style={[styles.container, { justifyContent: "center", flex: 1 }]}>
+        <Text>Carregando usuário...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView style={styles.container}>
+      <Header navigation={navigation} />
+
+      {/* Perfil do Usuário */}
+      <View style={styles.configUser}>
+        <Image
+          source={{
+            uri: usuario.foto || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+          }}
+          style={styles.fotoPerfil}
+        />
+        <Text style={styles.usuarioNome}>{usuario.nome}</Text>
+        <TouchableOpacity
+          style={styles.btnEditar}
+          onPress={() => navigation.navigate("AlterPerfil")}
+        >
+          <Text style={styles.btnEditarText}>Editar perfil</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Lista de opções */}
+      <View style={styles.configOpcoes}>
+        <Text style={styles.opcoesTitle}>Configurações</Text>
+        <TouchableOpacity style={styles.opcaoItem}>
+          <Text style={styles.opcaoTexto}>Idioma</Text>
+          <Text style={styles.seta}>›</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.opcaoItem}>
+          <Text style={styles.opcaoTexto}>Tamanho da fonte</Text>
+          <Text style={styles.seta}>›</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.opcaoItem}>
+          <Text style={styles.opcaoTexto}>Dúvidas frequentes</Text>
+          <Text style={styles.seta}>›</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Botão sair */}
+      <TouchableOpacity style={styles.btnLogout} onPress={handleLogout}>
+        <Text style={styles.btnLogoutText}>Sair</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+
+  // ===== Perfil do usuário =====
+  configUser: { alignItems: "center", marginBottom: 30 },
+  fotoPerfil: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    borderWidth: 3,
+    borderColor: "#ff6a00",
+    backgroundColor: "#f0f0f0",
+    marginBottom: 12,
+  },
+  usuarioNome: { fontSize: 20, fontWeight: "600", marginBottom: 10 },
+  btnEditar: {
+    backgroundColor: "#ff6a00",
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+  },
+  btnEditarText: { color: "#fff", fontWeight: "500", fontSize: 14 },
+
+  // ===== Opções =====
+  configOpcoes: { marginBottom: 30 },
+  opcoesTitle: { fontSize: 16, fontWeight: "600", marginBottom: 10 },
+  opcaoItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  opcaoTexto: { fontSize: 15, color: "#111" },
+  seta: { fontSize: 18, color: "#999" },
+
+  // ===== Botão Logout =====
+  btnLogout: {
+    backgroundColor: "#ff4b5c",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  btnLogoutText: { color: "#fff", fontWeight: "600", fontSize: 16 },
+});
