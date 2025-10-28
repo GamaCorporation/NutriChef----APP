@@ -1,6 +1,4 @@
 import { Router } from "express";
-import fs from "fs";
-import path from "path";
 
 // DAO
 import {
@@ -8,6 +6,9 @@ import {
   buscarReceitas,
   buscarReceitasPorCategoria,
   incluirReceita,
+  inserirIngredientes,
+  inserirPassos,
+  inserirUtensilios,
   buscarCategoriasForm,
   buscarIngredientesForm,
 } from "../DAO/script/receita.js";
@@ -40,7 +41,7 @@ router.get("/receitas", async (req, res) => {
   }
 });
 
-router.get("/receita/:id", async (req, res) => {
+router.get("/receitaDet/:id", async (req, res) => {
   try {
     const receita = await buscarReceitaPorId(req.params.id);
     if (!receita) return res.status(404).json({ message: "Receita não encontrada" });
@@ -81,12 +82,51 @@ router.get("/ingredientes", async (req, res) => {
   }
 });
 
-// Publicar nova receita
+router.get("/resultados", async (req, res) => {
+  const termo = req.query.q || "";
+  try {
+    const receitas = await buscarReceitas(termo);
+    res.json({ receitas, termo });
+  } catch (err) {
+    console.error("Erro na rota /resultados:", err);
+    res.status(500).json({ erro: "Erro ao buscar receitas" });
+  }
+});
+
+// -------------------
+// PARTE DE RECEITAS
+// -------------------
+function extrairNomeIngrediente(ingrediente) {
+  // remove números, medidas e unidades comuns
+  return ingrediente
+    .replace(/\d+[.,]?\d*\s*(kg|g|l|ml|xícara|colher|pitada)?\s*/gi, '') // remove quantidade
+    .trim()
+    .toLowerCase();
+}
+
+// Função para mapear nomes de ingredientes para ids do banco
+async function mapIngredientes(ingredientesRaw) {
+  const todosIngredientes = await buscarIngredientesForm(); // [{id_ingrediente, nome}, ...]
+  
+  return ingredientesRaw.map(item => {
+    const nomeLimpo = extrairNomeIngrediente(item);
+    const encontrado = todosIngredientes.find(i => i.nome.toLowerCase() === nomeLimpo);
+    if (!encontrado) throw new Error(`Ingrediente não encontrado na base: ${item}`);
+    return {
+      id_ingrediente: encontrado.id_ingrediente,
+      quantidade: null,
+      unidade: null
+    };
+  });
+}
+
+
+// ===================== ROTA /PUBLICAR =====================
 router.post("/publicar", uploadReceita.single("imagem"), async (req, res) => {
   try {
     let {
       nome,
-      descricao,
+      descricao,               
       porcoes,
       custo,
       dificuldade,
@@ -96,31 +136,28 @@ router.post("/publicar", uploadReceita.single("imagem"), async (req, res) => {
       ingredientes,
       utensilios,
       passos,
-      info,
     } = req.body;
 
-    if (!nome || !descricao) {
-      return res.status(400).json({ success: false, message: "Nome e descrição são obrigatórios" });
-    }
-    if (!idCategoria) {
-      return res.status(400).json({ success: false, message: "Selecione uma categoria" });
-    }
+    // Validações básicas
+    if (!nome || !descricao) return res.status(400).json({ success: false, message: "Nome e descrição são obrigatórios" });
+    if (!idCategoria) return res.status(400).json({ success: false, message: "Selecione uma categoria" });
 
     // Conversões
     idCategoria = parseInt(idCategoria);
     idIngredienteBase = idIngredienteBase ? parseInt(idIngredienteBase) : null;
     porcoes = parseInt(porcoes) || 1;
-    custo = parseInt(custo) || 1;
+    custo = parseFloat(custo) || 0;
     dificuldade = parseInt(dificuldade) || 1;
     tempoPreparo = parseInt(tempoPreparo) || 0;
 
-    ingredientes = JSON.parse(ingredientes || "[]");
+    ingredientes = JSON.parse(ingredientes || "[]"); // array de nomes ou objetos {nome, quantidade, unidade}
     utensilios = JSON.parse(utensilios || "[]");
     passos = JSON.parse(passos || "[]");
 
     const imagem = req.file ? `/receitas/${req.file.filename}` : "/receitas/default.jpg";
 
-    const resultado = await incluirReceita({
+    // Inserir receita
+    const idNovaReceita = await incluirReceita({
       nome,
       descricao,
       porcoes,
@@ -129,19 +166,26 @@ router.post("/publicar", uploadReceita.single("imagem"), async (req, res) => {
       idCategoria,
       idIngredienteBase,
       tempoPreparo,
-      ingredientes,
-      utensilios,
-      passos,
-      info,
       imagem,
     });
 
-    res.json({ success: true, message: "Receita cadastrada com sucesso", resultado });
+    // Mapear ingredientes para IDs
+    if (ingredientes.length > 0) {
+      const ingredientesMapeados = await mapIngredientes(ingredientes);
+      await inserirIngredientes(idNovaReceita, ingredientesMapeados);
+    }
+
+    // Inserir utensílios e passos
+    if (utensilios.length > 0) await inserirUtensilios(idNovaReceita, utensilios);
+    if (passos.length > 0) await inserirPassos(idNovaReceita, passos);
+
+    res.json({ success: true, message: "Receita cadastrada com sucesso", id: idNovaReceita });
   } catch (err) {
-    console.error(err);
+    console.error("Erro ao salvar receita:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
+
 
 // ===============================
 // 👤 ROTAS DE USUÁRIO
@@ -263,5 +307,21 @@ router.delete("/perfil", async (req, res) => {
     res.status(500).json({ success: false, message: "Erro ao deletar conta" });
   }
 });
+
+
+// ===============================
+// 🌍 IMPORTAR RECEITA EXTERNA (API)
+// ===============================
+/* SEM USAR
+  router.get("/api/importar-receita", async (req, res) => {
+    try {
+      const receita = await importarReceitaAleatoria();
+      res.json(receita);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Erro ao importar receita externa" });
+    }
+  });
+*/
 
 export default router;

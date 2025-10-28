@@ -1,42 +1,38 @@
 -- ========================================
 -- Banco de Dados NutriChef
 -- ========================================
-CREATE DATABASE NutriChef;
+CREATE DATABASE IF NOT EXISTS NutriChef;
 USE NutriChef;
+
 -- ========================================
 -- TABELAS
 -- ========================================
 
-CREATE TABLE categorias (
+CREATE TABLE IF NOT EXISTS categorias (
     id_categorias INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE caracteristicas (
+CREATE TABLE IF NOT EXISTS caracteristicas (
     id_caracteristicas INT AUTO_INCREMENT PRIMARY KEY,
     caracteristica VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE ingrediente_caracteristica (
-    id_caracteristica INT AUTO_INCREMENT PRIMARY KEY,
-    descricao VARCHAR(100) NOT NULL
-);
-
-CREATE TABLE ingredientes (
+CREATE TABLE IF NOT EXISTS ingredientes (
     id_ingrediente INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     tipo VARCHAR(50),
     custo_ingrediente DECIMAL(10,2),
-    id_ingrediente_caracteristica INT,
-    FOREIGN KEY (id_ingrediente_caracteristica) REFERENCES ingrediente_caracteristica(id_caracteristica)
+    id_caracteristica INT,
+    FOREIGN KEY (id_caracteristica) REFERENCES caracteristicas(id_caracteristicas)
 );
 
-CREATE TABLE utensilios (
+CREATE TABLE IF NOT EXISTS utensilios (
     id_utensilio INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE usuarios (
+CREATE TABLE IF NOT EXISTS usuarios (
     id_usuarios INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -44,12 +40,18 @@ CREATE TABLE usuarios (
     foto VARCHAR(255)
 );
 
-CREATE TABLE dificuldade (
+CREATE TABLE IF NOT EXISTS adm (
+    id_adm INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    senha VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS dificuldade (
     idDificuldade INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE receitas (
+CREATE TABLE IF NOT EXISTS receitas (
     id_receitas INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     descricao TEXT,
@@ -59,23 +61,23 @@ CREATE TABLE receitas (
     id_categoria INT,
     id_ingrediente_base INT,
     tempo_preparo INT,
-    imagem VARCHAR(255),
+    imagem VARCHAR(255) DEFAULT 'default.jpg',
     FOREIGN KEY (id_categoria) REFERENCES categorias(id_categorias),
     FOREIGN KEY (id_ingrediente_base) REFERENCES ingredientes(id_ingrediente),
     FOREIGN KEY (idDificuldade) REFERENCES dificuldade(idDificuldade)
 );
 
-CREATE TABLE receita_ingredientes (
+CREATE TABLE IF NOT EXISTS receita_ingredientes (
     id_ingrediente INT,
     id_receitas INT,
-    quantidade INT,
+    quantidade DECIMAL(10,2),
     unidade VARCHAR(50),
     PRIMARY KEY (id_ingrediente, id_receitas),
     FOREIGN KEY (id_ingrediente) REFERENCES ingredientes(id_ingrediente),
     FOREIGN KEY (id_receitas) REFERENCES receitas(id_receitas)
 );
 
-CREATE TABLE receita_utensilios (
+CREATE TABLE IF NOT EXISTS receita_utensilios (
     id_receitas INT,
     id_utensilio INT,
     PRIMARY KEY (id_receitas, id_utensilio),
@@ -83,7 +85,7 @@ CREATE TABLE receita_utensilios (
     FOREIGN KEY (id_utensilio) REFERENCES utensilios(id_utensilio)
 );
 
-CREATE TABLE receita_passos (
+CREATE TABLE IF NOT EXISTS receita_passos (
     id_passos INT AUTO_INCREMENT PRIMARY KEY,
     id_receitas INT,
     descricao TEXT,
@@ -91,7 +93,7 @@ CREATE TABLE receita_passos (
     FOREIGN KEY (id_receitas) REFERENCES receitas(id_receitas)
 );
 
-CREATE TABLE receitas_caracteristicas (
+CREATE TABLE IF NOT EXISTS receitas_caracteristicas (
     id_receitas INT,
     id_caracteristicas INT,
     PRIMARY KEY (id_receitas, id_caracteristicas),
@@ -99,7 +101,7 @@ CREATE TABLE receitas_caracteristicas (
     FOREIGN KEY (id_caracteristicas) REFERENCES caracteristicas(id_caracteristicas)
 );
 
-CREATE TABLE avaliacoes (
+CREATE TABLE IF NOT EXISTS avaliacoes (
     id_avaliacoes INT AUTO_INCREMENT PRIMARY KEY,
     id_usuarios INT,
     id_receitas INT,
@@ -116,9 +118,16 @@ CREATE TABLE avaliacoes (
 
 -- Usuários
 INSERT INTO usuarios (nome, email, senha) VALUES
+('João leila', 'ghggjmgj@gmail.com', '560789'),
 ('João Silva', 'joao@exemplo.com', '1234'),
 ('Maria Oliveira', 'maria@exemplo.com', 'abcd'),
 ('Carlos Souza', 'carlos@exemplo.com', 'senha123');
+
+-- Adm
+INSERT INTO adm (nome, senha) VALUES
+('Vittor Nascimento', '1234'),
+('Gustavo Quintanilia', 'abcd'),
+('Carlos Eduardo', 'senha123');
 
 -- Categorias
 INSERT INTO categorias (nome) VALUES
@@ -341,35 +350,55 @@ END;
 CREATE PROCEDURE spInsere_Ingrediente (
     IN nomeIngrediente VARCHAR(100),
     IN tipoIngrediente VARCHAR(50),
-    IN custo DECIMAL(10,2)
+    IN custo DECIMAL(10,2),
+    IN idCaracteristica INT
 )
 BEGIN
     IF EXISTS (SELECT 1 FROM ingredientes WHERE nome = nomeIngrediente) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ingrediente já cadastrado!';
     ELSE
-        INSERT INTO ingredientes (nome, tipo, custo_ingrediente)
-        VALUES (nomeIngrediente, tipoIngrediente, custo);
+        INSERT INTO ingredientes (nome, tipo, custo_ingrediente, id_caracteristica)
+        VALUES (nomeIngrediente, tipoIngrediente, custo, idCaracteristica);
     END IF;
 END;
 //
 
-CREATE PROCEDURE spInsere_Receita (
-    IN nomeReceita VARCHAR(100),
-    IN descricaoReceita TEXT,
-    IN porcoes INT,
-    IN custo DECIMAL(10,2),
-    IN idDificuldade INT,
-    IN idCategoria INT,
-    IN idIngredienteBase INT,
-    IN tempoPreparo INT,
-    IN imagem VARCHAR(255)
+CREATE PROCEDURE spInsere_Receita(
+    IN p_nome VARCHAR(255),
+    IN p_descricao TEXT,
+    IN p_porcoes INT,
+    IN p_custo DECIMAL(10,2),
+    IN p_dificuldade INT,
+    IN p_idCategoria INT,
+    IN p_idIngredienteBase INT,
+    IN p_tempoPreparo INT,
+    IN p_imagem VARCHAR(255)
 )
 BEGIN
     INSERT INTO receitas (
-        nome, descricao, porcoes, custo_aproximado, idDificuldade, id_categoria, id_ingrediente_base, tempo_preparo, imagem
-    ) VALUES (
-        nomeReceita, descricaoReceita, porcoes, custo, idDificuldade, idCategoria, idIngredienteBase, tempoPreparo, imagem
+        nome, descricao, porcoes, custo_aproximado, idDificuldade,
+        id_categoria, id_ingrediente_base, tempo_preparo, imagem
+    )
+    VALUES (
+        p_nome, p_descricao, p_porcoes, p_custo, p_dificuldade,
+        p_idCategoria, p_idIngredienteBase, p_tempoPreparo, p_imagem
     );
+
+    SELECT LAST_INSERT_ID() AS id_receitas;
 END;
 //
+
+CREATE PROCEDURE spInsere_Adm (
+    IN nomeAdm VARCHAR(100),
+    IN senhaAdm VARCHAR(255)
+)
+BEGIN
+    IF EXISTS (SELECT 1 FROM adm WHERE nome = nomeAdm) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Não é possível fazer cadastro! Nome já cadastrado!';
+    ELSE
+        INSERT INTO adm (nome, senha) VALUES (nomeAdm, senhaAdm);
+    END IF;
+END;
+//
+
 DELIMITER ;

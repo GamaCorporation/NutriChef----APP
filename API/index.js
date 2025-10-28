@@ -20,8 +20,9 @@ const app = express();
 // 🧱 MIDDLEWARES
 // =============================
 app.use(cors({
-  origin: "http://localhost:8081",
-  credentials: true,
+  origin: ["http://localhost:8081", "http://localhost:3000"], // App React + Dashboard ADM
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  credentials: true
 }));
 
 app.use(express.urlencoded({ extended: true }));

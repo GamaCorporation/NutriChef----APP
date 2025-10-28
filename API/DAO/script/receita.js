@@ -19,17 +19,38 @@ export async function buscarTodasReceitas() {
 }
 
 // ===============================
-// 🔎 BUSCAR RECEITAS PELO TERMO
+// 🔎 BUSCAR RECEITAS PELOS TERMOS (vários ingredientes)
 // ===============================
 export async function buscarReceitas(termo) {
-  const sql = `
-    SELECT id_receitas, nome, descricao 
-    FROM receitas 
-    WHERE nome LIKE ? OR descricao LIKE ?
-  `;
   const conn = await conexao();
+
   try {
-    const [rows] = await conn.execute(sql, [`%${termo}%`, `%${termo}%`]);
+    // Divide os termos por vírgula ou espaço
+    const termos = termo
+      .split(/[, ]+/) // separa por vírgulas e/ou espaços
+      .map(t => t.trim())
+      .filter(t => t.length > 0);
+
+    if (termos.length === 0) {
+      await conn.end();
+      return [];
+    }
+
+    // Cria as condições dinâmicas para cada termo (usando LIKE)
+    const condicoes = termos
+      .map(() => "(nome LIKE ? OR descricao LIKE ?)")
+      .join(" OR ");
+
+    // Cria os parâmetros de busca duplicando cada termo
+    const params = termos.flatMap(t => [`%${t}%`, `%${t}%`]);
+
+    const sql = `
+      SELECT id_receitas, nome, descricao
+      FROM receitas
+      WHERE ${condicoes}
+    `;
+
+    const [rows] = await conn.execute(sql, params);
     await conn.end();
     return rows;
   } catch (err) {
@@ -145,19 +166,12 @@ export async function buscarIngredientesForm() {
 }
 
 // ===============================
-// ⚡ INCLUIR RECEITA (9 PARÂMETROS)
+// ⚡ INCLUIR RECEITA 
 // ===============================
 export async function incluirReceita(dados) {
   const {
-    nome,
-    descricao,
-    porcoes,
-    custo,
-    dificuldade,
-    idCategoria = 1,
-    idIngredienteBase = 1,
-    tempoPreparo,
-    imagem = "default.jpg"
+    nome, descricao, porcoes, custo, dificuldade, idCategoria = 1,
+    idIngredienteBase = 1, tempoPreparo, imagem = "default.jpg"
   } = dados;
 
   const sql = `CALL spInsere_Receita(?, ?, ?, ?, ?, ?, ?, ?, ?)`;
@@ -165,20 +179,76 @@ export async function incluirReceita(dados) {
 
   try {
     const [results] = await conn.query(sql, [
-      nome,
-      descricao,
-      porcoes,
-      custo,
-      dificuldade,
-      idCategoria,
-      idIngredienteBase,
-      tempoPreparo,
-      imagem
+      nome, descricao, porcoes, custo, dificuldade,
+      idCategoria, idIngredienteBase, tempoPreparo, imagem
     ]);
+
+    if (!results || !results[0] || !results[0][0]) {
+      throw new Error("Procedure não retornou o ID da nova receita");
+    }
+
+    const idNovaReceita = results[0][0].id_receitas;
     await conn.end();
-    return results;
+    return idNovaReceita;
   } catch (err) {
     await conn.end();
     throw new Error(err.sqlMessage || err.message);
   }
 }
+
+// Inserir Ingredientes (id_ingrediente, quantidade, unidade)
+export async function inserirIngredientes(idReceita, ingredientes) {
+  const conn = await conexao();
+  try {
+    for (const item of ingredientes) {
+      await conn.execute(
+        `INSERT INTO receita_ingredientes (id_receitas, id_ingrediente, quantidade, unidade) VALUES (?, ?, ?, ?)`,
+        [
+          idReceita,
+          item.id_ingrediente ?? null,
+          item.quantidade ?? null,
+          item.unidade ?? null
+        ]
+      );
+    }
+    await conn.end();
+  } catch (err) {
+    await conn.end();
+    throw err;
+  }
+}
+
+// Inserir Utensílios
+export async function inserirUtensilios(idReceita, utensilios) {
+  const conn = await conexao();
+  try {
+    for (const u of utensilios) {
+      await conn.execute(
+        `INSERT INTO receita_utensilios (id_receitas, id_utensilio) VALUES (?, ?)`,
+        [idReceita, u] // u = id_utensilio
+      );
+    }
+    await conn.end();
+  } catch (err) {
+    await conn.end();
+    throw err;
+  }
+}
+
+// Inserir Passos
+export async function inserirPassos(idReceita, passos) {
+  const conn = await conexao();
+  try {
+    for (let i = 0; i < passos.length; i++) {
+      await conn.execute(
+        `INSERT INTO receita_passos (id_receitas, descricao, ordem) VALUES (?, ?, ?)`,
+        [idReceita, passos[i], i + 1]
+      );
+    }
+    await conn.end();
+  } catch (err) {
+    await conn.end();
+    throw err;
+  }
+}
+
