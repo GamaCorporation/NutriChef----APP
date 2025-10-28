@@ -1,0 +1,69 @@
+/* === Estilo do card de usuários do dashboard === */
+
+.users-card {
+  padding: 12px;
+  margin-top: 16px;
+}
+
+.users-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.user-search {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+  color: inherit;
+  margin-bottom: 10px;
+}
+
+.users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 300px;
+  overflow: auto;
+}
+
+.user-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.user-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.avatar-sm {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.no-users {
+  padding: 18px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.meta-muted {
+  color: var(--muted);
+  font-size: 13px;
+}

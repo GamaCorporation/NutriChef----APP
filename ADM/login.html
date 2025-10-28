@@ -1,0 +1,182 @@
+<!-- Tela LOGIN -->
+  <div id="login-screen" class="screen">
+    <button class="back-button" onclick="voltarParaWelcome()">←</button>
+    <h1 style="color: #e68900;">Entrar</h1>
+    <p>Bem-vindo de volta, sentimos sua falta!</p>
+    
+    <form id="login-form">
+        <div class="form-group">
+            <input type="text" id="login-nome" placeholder="Nome" required>
+            <div class="error-message" id="login-nome-error"></div>
+        </div>
+
+        <div class="form-group">
+            <input type="password" id="login-password" placeholder="Senha" required>
+            <div class="error-message" id="login-password-error"></div>
+        </div>
+
+        <button type="submit" class="button-login" style="margin-bottom: 10px;">Entrar</button>
+        <a href="/cadastro.html" style="text-decoration: none;">Criar uma conta!</a>
+    </form>
+    
+    <div class="msg" id="login-msg"></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+
+<style>
+    /* ==== Estilo geral ==== */
+body {
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(120deg, #FFF7E6, #FFEFCC); /* laranja e amarelo suaves */
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+/* ==== Container principal ==== */
+#login-screen {
+  background: #242424;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  width: 350px;
+  padding: 40px 30px;
+  text-align: center;
+  position: relative;
+  animation: fadeIn 0.6s ease;
+}
+
+/* ==== Botão de voltar ==== */
+.back-button {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  background: none;
+  border: none;
+  color: #e68900;
+  font-size: 22px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.back-button:hover {
+  color: #ffaa33;
+  transform: translateX(-3px);
+}
+
+/* ==== Título e subtítulo ==== */
+#login-screen h1 {
+  font-size: 2em;
+  margin-bottom: 5px;
+  color: #e68900;
+}
+#login-screen p {
+  font-size: 0.95em;
+  color: #ccc;
+  margin-bottom: 25px;
+}
+
+/* ==== Formulário ==== */
+.form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px 15px;
+  border: none;
+  border-radius: 8px;
+  background: #333;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  transition: 0.3s;
+}
+input:focus {
+  background: #3d3d3d;
+  box-shadow: 0 0 0 2px #e68900;
+}
+.error-message {
+  font-size: 13px;
+  color: #ff6666;
+  margin-top: 5px;
+}
+
+/* ==== Mostrar senha ==== */
+.toggle-password {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.toggle-password:hover {
+  color: #e68900;
+}
+
+/* ==== Link Esqueci senha ==== */
+.forgot-password {
+  display: block;
+  text-align: right;
+  margin: 10px 0 20px;
+  color: #e68900;
+  text-decoration: none;
+  font-size: 0.9em;
+}
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+/* ==== Botão Entrar ==== */
+.button-login {
+  width: 100%;
+  padding: 12px;
+  background: #e68900;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.button-login:hover {
+  background: #ffaa33;
+  transform: scale(1.03);
+}
+
+/* ==== Mensagem abaixo ==== */
+#login-msg {
+  margin-top: 15px;
+  font-weight: 500;
+}
+
+/* ==== Animação suave ==== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==== Responsividade ==== */
+@media (max-width: 400px) {
+  #login-screen {
+    width: 90%;
+    padding: 30px 20px;
+  }
+}
+
+</style>

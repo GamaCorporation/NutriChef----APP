@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel de Administradores | NutriChef</title>
+
+  <!-- Fonte -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Estilo -->
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f5f6fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #2E7D32;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #2E7D32;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      min-width: 200px;
+      font-size: 14px;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      background-color: #2E7D32;
+      color: white;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background-color: #256528;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #e8f5e9;
+    }
+
+    td button {
+      margin: 0 5px;
+      padding: 6px 10px;
+      border-radius: 5px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .edit {
+      background-color: #1976d2;
+      color: white;
+    }
+
+    .edit:hover {
+      background-color: #115293;
+    }
+
+    .delete {
+      background-color: #d32f2f;
+      color: white;
+    }
+
+    .delete:hover {
+      background-color: #9a0007;
+    }
+  </style>
+</head>
+<body>
+  <header>Painel de Administradores</header>
+
+  <div class="container">
+    <h2>Gerenciar Administradores</h2>
+
+    <!-- Formulário de cadastro/edição -->
+    <form id="admForm">
+      <input type="hidden" id="id_adm">
+      <input type="text" id="nome" placeholder="Nome" required>
+      <input type="password" id="senha" placeholder="Senha" required>
+      <button type="submit">Salvar</button>
+      <button type="button" id="cancelar" style="display:none; background:#9e9e9e;">Cancelar</button>
+    </form>
+
+    <!-- Tabela de administradores -->
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Senha</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaAdm">
+        <tr><td colspan="4">Carregando...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Script para consumir API -->
+  <script>
+    const API_URL = 'http://localhost:3000/api/adm';
+    const form = document.getElementById('admForm');
+    const tabela = document.getElementById('tabelaAdm');
+    const cancelarBtn = document.getElementById('cancelar');
+    let editando = false;
+
+    // Carregar administradores
+    async function carregarAdms() {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      tabela.innerHTML = data.length ? data.map(adm => `
+        <tr>
+          <td>${adm.id_adm}</td>
+          <td>${adm.nome}</td>
+          <td>${adm.senha}</td>
+          <td>
+            <button class="edit" onclick="editar(${adm.id_adm}, '${adm.nome}', '${adm.senha}')">Editar</button>
+            <button class="delete" onclick="excluir(${adm.id_adm})">Excluir</button>
+          </td>
+        </tr>
+      `).join('') : '<tr><td colspan="4">Nenhum administrador encontrado.</td></tr>';
+    }
+
+    // Criar/Atualizar administrador
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('id_adm').value;
+      const nome = document.getElementById('nome').value;
+      const senha = document.getElementById('senha').value;
+
+      const metodo = editando ? 'PUT' : 'POST';
+      const url = editando ? `${API_URL}/${id}` : API_URL;
+
+      const res = await fetch(url, {
+        method: metodo,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, senha })
+      });
+
+      const data = await res.json();
+      alert(data.message || data.error);
+      form.reset();
+      cancelarBtn.style.display = 'none';
+      editando = false;
+      carregarAdms();
+    });
+
+    // Editar administrador
+    function editar(id, nome, senha) {
+      document.getElementById('id_adm').value = id;
+      document.getElementById('nome').value = nome;
+      document.getElementById('senha').value = senha;
+      cancelarBtn.style.display = 'inline-block';
+      editando = true;
+    }
+
+    // Cancelar edição
+    cancelarBtn.addEventListener('click', () => {
+      form.reset();
+      cancelarBtn.style.display = 'none';
+      editando = false;
+    });
+
+    // Excluir administrador
+    async function excluir(id) {
+      if (!confirm('Deseja realmente excluir este administrador?')) return;
+      const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      alert(data.message || data.error);
+      carregarAdms();
+    }
+
+    // Inicializar
+    carregarAdms();
+  </script>
+</body>
+</html>

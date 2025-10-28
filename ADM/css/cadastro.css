@@ -1,0 +1,48 @@
+    body { 
+        font-family: Arial, sans-serif; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        height: 100vh; 
+        background: linear-gradient(120deg, #FFF7E6, #FFEFCC); /* laranja e amarelo suaves */
+    }
+    main{
+        background: #fff; 
+        padding: 20px; 
+        border-radius: 8px; 
+        background: #242424;
+        width: 450px; 
+    }
+    form { 
+        text-align: center;
+    }
+    input { 
+        width: 80%; 
+        padding: 8px; 
+        margin-bottom: 15px;
+        border-radius: 4px; 
+        border: 1px solid #ccc; 
+    }
+    button { 
+        width: 75%; 
+        padding: 10px; 
+        border: none;
+        font-weight: bold;
+        font-size: 15px;
+        border-radius: 4px; 
+        background: #e68900; 
+        color: #fff; 
+        cursor: pointer;
+        margin-top: 25px; 
+    }
+    button:hover { 
+        background: #0056b3; 
+    }
+    .error { 
+        color: red; 
+        margin-top: 10px; 
+    }
+    .success { 
+        color: green; 
+        margin-top: 10px; 
+    }

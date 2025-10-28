@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NutriChef - Dashboard</title>
+  <link rel="stylesheet" href="./css/dashboard.css">
+  <link rel="stylesheet" href="./css/dashUsuario.css">
+  <link rel="stylesheet" href="./css/dashReceitas.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar card">
+    <div class="logo"><span style="color:var(--accent)">Nutri</span><span class="chef">chef</span></div>
+    <nav>
+      <a class="nav-item active" href="#" data-screen="dashboard">Dashboard</a>
+      <a class="nav-item" href="#" data-screen="receitas">Receitas</a>
+      <a class="nav-item" href="#" data-screen="denuncias">Denúncias</a>
+      <a class="nav-item" href="#"data-screen="receitasRecebidas">Solicitação de Receitas</a>
+    </nav>
+    <div style="margin-top:auto;color:var(--muted);font-size:13px">vítor • admin</div>
+  </aside>
+
+  <main class="main">
+    <div class="card topbar">
+      <div class="top-left">
+        <div class="title" id="page-title">Visão Geral</div>
+        <div class="search">
+          <input placeholder="Pesquisar..." id="global-search">
+        </div>
+      </div>
+      <div class="icons">
+        <div class="avatar"></div>
+      </div>
+    </div>
+
+    <div class="screens">
+      <!-- DASHBOARD -->
+      <section class="card" id="screen-dashboard">
+        <div class="grid">
+          <div>
+            <h3 style="margin:0 0 14px 0;font-weight:700">Sites mais utilizados</h3>
+            <div class="list-card" id="sites-list"></div>
+
+            <div style="height:18px"></div>
+
+            <div class="stats">
+              <div class="stat">
+                <div class="label">Receitas postadas</div>
+                <div class="num" id="total-receitas">0</div>
+              </div>
+              <div class="stat">
+                <div class="label">Comentários</div>
+                <div class="num" id="total-comentarios">0</div>
+              </div>
+              <div class="stat">
+                <div class="label">Usuários cadastrados</div>
+                <div class="num" id="total-usuarios">0</div>
+              </div>
+            </div>
+          </div>
+
+          <aside>
+            <h4 style="margin:0 0 12px 0">Ingredientes mais procurados</h4>
+               <div class="card" style="padding:10px">
+                <div class="donut">
+                  <!-- simple svg donut mock -->
+                  <svg viewBox="0 0 42 42" width="220" height="140">
+                    <circle cx="21" cy="21" r="15.5" fill="none" stroke="#fff" stroke-width="8"/>
+                    <circle cx="21" cy="21" r="15.5" fill="none" stroke="#ffd9c2" stroke-width="8" stroke-dasharray="30 70" stroke-linecap="round" transform="rotate(-90 21 21)"/>
+                    <circle cx="21" cy="21" r="15.5" fill="none" stroke="#ffb380" stroke-width="8" stroke-dasharray="18 82" stroke-linecap="round" transform="rotate(-20 21 21)"/>
+                    <circle cx="21" cy="21" r="8" fill="#fff"/>
+                  </svg>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+                  <div style="display:flex;justify-content:space-between"><div style="display:flex;gap:8px;align-items:center"><span style="width:10px;height:10px;border-radius:50%;background:#ff7a00;display:inline-block"></span><span>Batata</span></div><div style="color:var(--muted)">74.6%</div></div>
+                  <div style="display:flex;justify-content:space-between"><div style="display:flex;gap:8px;align-items:center"><span style="width:10px;height:10px;border-radius:50%;background:#ffd9c2;display:inline-block"></span><span>Cebola</span></div><div style="color:var(--muted)">5.0%</div></div>
+                  <div style="display:flex;justify-content:space-between"><div style="display:flex;gap:8px;align-items:center"><span style="width:10px;height:10px;border-radius:50%;background:#ffb380;display:inline-block"></span><span>Frango</span></div><div style="color:var(--muted)">3.3%</div></div>
+                </div>
+              </div>
+          </aside>
+
+          
+            <!-- Card de Usuários -->
+            <div class="card users-card">
+              <div class="users-card-header">
+                <h4>Usuários</h4>
+                <div class="meta-muted" id="users-count-inline">0</div>
+              </div>
+
+              <input id="user-search" class="user-search" placeholder="Pesquisar usuários por nome..." />
+
+              <div id="users-container">
+                <div id="users-list" class="users-list"></div>
+                <div id="no-users-msg" class="no-users" style="display:none">Nenhum usuário cadastrado no momento.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RECEITAS -->
+        <section class="card" id="screen-receitas" style="display:none">
+          <h3>Receitas Cadastradas</h3>
+
+          <div class="receitas-top">
+            <input type="text" id="search-receita" placeholder="Pesquisar receita..." />
+          </div>
+
+          <div id="receitas-container" class="receitas-container"></div>
+        </section>
+
+        <!-- Modal de confirmação -->
+        <div id="delete-modal" class="modal" style="display:none;">
+          <div class="modal-content">
+            <h3>Excluir Receita</h3>
+            <p>Tem certeza que deseja excluir esta receita?</p>
+            <div class="modal-buttons">
+              <button id="confirm-delete">Sim, excluir</button>
+              <button id="cancel-delete">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DENÚNCIAS -->
+      <section class="card" id="screen-denuncias" style="display:none">
+        <h3>Denúncias</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Usuário</th><th>Tipo</th><th>Motivo</th><th>Email</th><th>Status</th></tr>
+            </thead>
+            <tbody id="denuncias-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SOLICITAÇÃO RECEITAS -->
+      <section class="card" id="screen-receitasRecebidas" style="display:none">
+        <h3>Receitas Recebidas</h3>
+
+        <div class="receitas-top">
+          <input type="text" id="search-receita-recebida" placeholder="Pesquisar receita..." />
+        </div>
+
+        <div id="receitas-recebidas-container" class="receitas-container"></div>
+      </section>
+
+      <!-- Modal de Receitas -->
+      <div id="modal-receita" class="modal" style="display:none;">
+        <div class="modal-content">
+          <span id="fechar-modal" style="cursor:pointer;float:right;font-size:18px">&times;</span>
+          <div id="conteudo-receita"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(async () => {
+  const screens = ['dashboard','receitas','denuncias','receitasRecebidas'];
+  const pageTitle = document.getElementById('page-title');
+
+  let receitasRecebidas = []; // armazenar todas as receitas
+  let paginaAtual = 0;
+  const receitasPorPagina = 5;
+
+  // Troca de telas
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+
+      const screen = item.getAttribute('data-screen');
+      pageTitle.textContent = 
+        screen==='dashboard'?'Visão Geral':
+        screen==='receitas'?'Receitas Cadastradas':
+        screen==='receitasRecebidas'?'Solicitações de Receitas':'Denúncias';
+
+      screens.forEach(s => {
+        const sec = document.getElementById('screen-'+s);
+        if(sec) sec.style.display = (s===screen)?'block':'none';
+      });
+
+      // Carrega receitas recebidas ao abrir a aba
+      if(screen==='receitasRecebidas') carregarReceitasRecebidas();
+    });
+  });
+
+  const containerReceitas = document.getElementById('receitas-recebidas-container');
+  const searchInput = document.getElementById('search-receita-recebida');
+  const modal = document.getElementById('modal-receita');
+  const conteudoModal = document.getElementById('conteudo-receita');
+  const btnFecharModal = document.getElementById('fechar-modal');
+
+  btnFecharModal.addEventListener('click', ()=> modal.style.display='none');
+
+  function criarCardResumo(receita) {
+    const card = document.createElement('div');
+    card.className = 'receita-card-resumo';
+    card.style.display = 'flex';
+    card.style.alignItems = 'center';
+    card.style.gap = '10px';
+    card.style.marginBottom = '10px';
+
+    card.innerHTML = `
+      <img src="${receita.imagem}" style="width:80px;height:60px;object-fit:cover;border-radius:5px">
+      <div style="flex:1">
+        <strong>${receita.nome}</strong><br>
+        <span style="font-size:12px;color:var(--muted)">${receita.categoria}</span>
+      </div>
+      <button class="btn-vermais">Ver Mais</button>
+    `;
+
+    card.querySelector('.btn-vermais').addEventListener('click', ()=> abrirModal(receita));
+    return card;
+  }
+
+  function abrirModal(receita) {
+    conteudoModal.innerHTML = `
+      <h3 contenteditable="true" id="edit-nome">${receita.nome}</h3>
+      <img src="${receita.imagem}" style="max-width:100%;border-radius:8px;margin-bottom:10px">
+      <p><strong>Categoria:</strong> <span contenteditable="true" id="edit-categoria">${receita.categoria}</span></p>
+      <p><strong>Origem:</strong> <span contenteditable="true" id="edit-origem">${receita.origem}</span></p>
+      <p><strong>Ingredientes:</strong></p>
+      <ul id="edit-ingredientes">
+        ${receita.ingredientes.map(i => `<li contenteditable="true">${i}</li>`).join('')}
+      </ul>
+      <p><strong>Instruções:</strong></p>
+      <p id="edit-instrucoes" contenteditable="true">${receita.instrucoes}</p>
+      <div class="modal-buttons">
+        <button id="salvar-edicao" style="background:#2ecc71">💾 Salvar Alterações</button>
+        <button id="aceitar-receita">Aceitar</button>
+        <button id="rejeitar-receita">Rejeitar</button>
+      </div>
+    `;
+    modal.style.display = 'flex';
+
+    // === AÇÕES ===
+    document.getElementById('salvar-edicao').onclick = () => {
+      const novosDados = {
+        nome: document.getElementById('edit-nome').innerText.trim(),
+        categoria: document.getElementById('edit-categoria').innerText.trim(),
+        origem: document.getElementById('edit-origem').innerText.trim(),
+        ingredientes: Array.from(document.querySelectorAll('#edit-ingredientes li')).map(li => li.innerText.trim()),
+        instrucoes: document.getElementById('edit-instrucoes').innerText.trim()
+      };
+
+      // Atualiza localmente
+      Object.assign(receita, novosDados);
+      alert('Alterações salvas localmente!');
+
+      // Salva no banco via API
+      fetch('http://localhost:3000/api/atualizar-receita', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: receita.id, // precisa vir no objeto original
+          nome: novosDados.nome,
+          categoria: novosDados.categoria,
+          origem: novosDados.origem,
+          ingredientes: novosDados.ingredientes,
+          instrucoes: novosDados.instrucoes
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert('Receita atualizada no banco com sucesso!');
+          } else {
+            alert('Erro: ' + data.message);
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Erro ao salvar no banco.');
+        });
+    };
+
+    document.getElementById('aceitar-receita').onclick = async () => {
+      try {
+        const receitaSelecionada = receita; // receita do modal
+
+        const response = await fetch('http://localhost:3001/publicar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nome: receitaSelecionada.nome || 'Receita sem nome',
+            descricao: receitaSelecionada.instrucoes || 'Sem instruções',
+            porcoes: 1,
+            custo: 1,
+            dificuldade: 1,
+            idCategoria: 1,
+            idIngredienteBase: 1,
+            tempoPreparo: receitaSelecionada.tempo || 0,
+            ingredientes: JSON.stringify(receitaSelecionada.ingredientes || []),
+            utensilios: JSON.stringify([]),
+            passos: JSON.stringify([]),
+            info: ''
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert(`Receita "${receitaSelecionada.nome}" validada e salva no banco!`);
+          modal.style.display = 'none';
+          removerReceita(receitaSelecionada.nome);
+        } else {
+          alert('Erro ao salvar receita: ' + data.message);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao salvar receita no servidor.');
+      }
+    };
+
+
+    document.getElementById('rejeitar-receita').onclick = () => {
+      alert(`Receita "${receita.nome}" rejeitada!`);
+      modal.style.display = 'none';
+      removerReceita(receita.nome);
+    };
+  }
+
+  function removerReceita(nome) {
+    receitasRecebidas = receitasRecebidas.filter(r=>r.nome !== nome);
+    paginaAtual = 0; // reset página
+    mostrarReceitasPagina();
+  }
+
+  function mostrarReceitasPagina() {
+    containerReceitas.innerHTML='';
+    const inicio = paginaAtual * receitasPorPagina;
+    const fim = inicio + receitasPorPagina;
+    const pageReceitas = receitasRecebidas.slice(inicio,fim);
+
+    pageReceitas.forEach(r=>{
+      const card = criarCardResumo(r);
+      containerReceitas.appendChild(card);
+    });
+
+    // Se houver mais receitas, botão carregar mais
+    if(fim < receitasRecebidas.length){
+      const btnMais = document.createElement('button');
+      btnMais.textContent = 'Carregar Mais';
+      btnMais.style.marginTop='10px';
+      btnMais.onclick = ()=>{
+        paginaAtual++;
+        mostrarReceitasPagina();
+      };
+      containerReceitas.appendChild(btnMais);
+    }
+  }
+
+  async function carregarReceitasRecebidas() {
+    containerReceitas.innerHTML = 'Carregando receitas...';
+    receitasRecebidas = [];
+    paginaAtual = 0;
+
+    const requests = [];
+    for (let i = 0; i < 10; i++) {
+        requests.push(fetch('http://localhost:3000/api/importar-receita').then(r => r.json()));
+    }
+
+    receitasRecebidas = await Promise.all(requests); // espera todas traduzidas
+    mostrarReceitasPagina();
+  }
+
+
+  searchInput.addEventListener('input', ()=>{
+    const termo = searchInput.value.toLowerCase();
+    receitasRecebidas = receitasRecebidas.filter(r=>r.nome.toLowerCase().includes(termo));
+    paginaAtual = 0;
+    mostrarReceitasPagina();
+  });
+
+})();
+
+// Funções para popular dados
+  async function fetchStats() {
+    const res = await fetch('http://localhost:3000/api/stats');
+    const data = await res.json();
+    document.getElementById('total-receitas').textContent = data.receitas;
+    document.getElementById('total-comentarios').textContent = data.comentarios;
+    document.getElementById('total-usuarios').textContent = data.usuarios;
+  }
+
+  async function fetchSites() {
+    const res = await fetch('http://localhost:3000/api/sites');
+    const data = await res.json();
+    const container = document.getElementById('sites-list');
+    container.innerHTML = '';
+    data.forEach(site => {
+      container.innerHTML += `
+        <div class="list-row">
+          <div class="list-left"><div class="avatar-sm">${site.nome[0]}</div><div><div style="font-weight:700">${site.nome}</div><div style="color:var(--muted);font-size:13px">${site.produtos} produtos</div></div></div>
+          <div>⋮</div>
+        </div>
+      `;
+    });
+  }
+
+  async function fetchIngredientes() {
+    const res = await fetch('http://localhost:3000/api/ingredientes');
+    const data = await res.json();
+    const container = document.getElementById('ingredientes-list');
+    container.innerHTML = '';
+    data.forEach(ing => {
+      container.innerHTML += `
+        <div style="display:flex;justify-content:space-between">
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="width:10px;height:10px;border-radius:50%;background:${ing.cor};display:inline-block"></span>
+            <span>${ing.nome}</span>
+          </div>
+          <div style="color:var(--muted)">${ing.percentual}%</div>
+        </div>
+      `;
+    });
+  }
+
+  async function fetchDenuncias() {
+    const res = await fetch('http://localhost:3000/api/denuncias');
+    const data = await res.json();
+    const tbody = document.getElementById('denuncias-table');
+    tbody.innerHTML = '';
+    data.forEach(d => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${d.usuario}</td>
+          <td>${d.tipo}</td>
+          <td>${d.motivo}</td>
+          <td>${d.email}</td>
+          <td><span class="status ${d.status}">${d.status}</span></td>
+        </tr>
+      `;
+    });
+  }
+
+  // Chama tudo
+  fetchStats();
+  fetchSites();
+  fetchIngredientes();
+  fetchDenuncias();
+</script>
+
+
+<script src="./js/dashUsuario.js"></script>
+<script src="./js/dashReceitas.js"></script>
+</body>
+</html>
