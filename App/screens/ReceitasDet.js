@@ -104,12 +104,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FF7F50',
   },
-  recipeImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 8,
-    marginBottom: 15,
-  },
+recipeImage: {
+  width: '60%',
+  height: undefined,      // permite ajustar altura proporcional
+  aspectRatio: 1.5,       // controla a proporção da imagem (1.5 = mais larga, 1 = quadrada, 0.75 = mais alta)
+  borderRadius: 8,
+  marginBottom: 15,
+  resizeMode: 'cover',    // corta suavemente mantendo proporção
+  alignSelf: 'center',    // centraliza a própria imagem
+},
+
   title: {
     fontSize: 24,
     fontWeight: 'bold',

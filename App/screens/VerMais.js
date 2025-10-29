@@ -72,7 +72,7 @@ export default function ReceitasPorCategoria({ navigation }) {
                   <TouchableOpacity
                     key={receita.id_receitas}
                     style={styles.recipeCard}
-                    onPress={() => navigation.navigate("ReceitasDet", { id: receita.id_receitas })}
+                    onPress={() => navigation.navigate("ReceitaDet", { id: receita.id_receitas })}
                   >
                     <Image
                       source={{ uri: receita.imagem }}

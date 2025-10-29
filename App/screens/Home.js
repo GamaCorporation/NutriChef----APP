@@ -7,9 +7,17 @@ export default function Home({ navigation }) {
   const [receitas, setReceitas] = useState([]);
   const [user, setUser] = useState(null); // null significa não logado
 
+  const receitasRapidas = receitas.filter(r => r.tempo_preparo <= 30);
+  const receitasEconomicas = receitas.filter(r => r.custo_aproximado <= 20);
+  const receitasFaceis = receitas.filter(r => r.idDificuldade <= 2);
+  const receitasProteicas = receitas.filter(r => 
+    ['Frango', 'Carne Moída', 'Ovos'].includes(r.ingrediente_base_nome)
+  );
+
   useEffect(() => {
     // Buscar receitas
     fetch('http://localhost:3001/')
+
       .then((res) => res.json())
       .then((data) => setReceitas(data))
       .catch((err) => console.error('Erro ao carregar receitas:', err));
@@ -84,7 +92,7 @@ export default function Home({ navigation }) {
             </TouchableOpacity>
           </View>
 
-          {/* RECEITAS */}
+          {/* RECEITAS RECENTES */}
           <View style={styles.sectionHeader}>
             <Text style={styles.subtitle}>Receitas Recentes</Text>
             <TouchableOpacity onPress={() => navigation.navigate('VerMais')}>
@@ -100,14 +108,15 @@ export default function Home({ navigation }) {
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.recipeCard}
-                  onPress={() => navigation.navigate('ReceitaDet', { id: item.id_receitas })}
+                  onPress={() =>
+                    navigation.navigate('ReceitaDet', { id: item.id_receitas })
+                  }
                 >
                   <Image source={{ uri: item.imagem }} style={styles.recipeImage} />
                   <Text style={styles.recipeTitle}>{item.nome}</Text>
                   <Text style={styles.recipeTime}>
                     ⏱ {formatarTempo(item.tempo_preparo)}
                   </Text>
-
                 </TouchableOpacity>
               )}
               showsHorizontalScrollIndicator={false}
@@ -115,6 +124,107 @@ export default function Home({ navigation }) {
           ) : (
             <Text style={styles.loading}>Carregando receitas...</Text>
           )}
+
+          {/* 🍓 RECEITAS RÁPIDAS */}
+          <View style={styles.section}>
+            <Text style={styles.subtitle}>⏱ Receitas Rápidas</Text>
+            <FlatList
+              horizontal
+              data={receitasRapidas}
+              keyExtractor={(item) => item.id_receitas.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.recipeCard}
+                  onPress={() =>
+                    navigation.navigate('ReceitaDet', { id: item.id_receitas })
+                  }
+                >
+                  <Image source={{ uri: item.imagem }} style={styles.recipeImage} />
+                  <Text style={styles.recipeTitle}>{item.nome}</Text>
+                  <Text style={styles.recipeTime}>⏱ {item.tempo_preparo} min</Text>
+                </TouchableOpacity>
+              )}
+              showsHorizontalScrollIndicator={false}
+            />
+          </View>
+
+          {/* 💰 RECEITAS ECONÔMICAS */}
+          <View style={styles.section}>
+            <Text style={styles.subtitle}>💰 Receitas Econômicas</Text>
+            <FlatList
+              horizontal
+              data={receitasEconomicas}
+              keyExtractor={(item) => item.id_receitas.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.recipeCard}
+                  onPress={() =>
+                    navigation.navigate('ReceitaDet', { id: item.id_receitas })
+                  }
+                >
+                  <Image source={{ uri: item.imagem }} style={styles.recipeImage} />
+                  <Text style={styles.recipeTitle}>{item.nome}</Text>
+                  <Text style={styles.recipeTime}>
+                    💵 R$ {item.custo_aproximado?.toFixed(2) ?? '---'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              showsHorizontalScrollIndicator={false}
+            />
+          </View>
+
+          {/* 😌 RECEITAS FÁCEIS */}
+          <View style={styles.section}>
+            <Text style={styles.subtitle}>😌 Receitas Fáceis</Text>
+            <FlatList
+              horizontal
+              data={receitasFaceis}
+              keyExtractor={(item) => item.id_receitas.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.recipeCard}
+                  onPress={() =>
+                    navigation.navigate('ReceitaDet', { id: item.id_receitas })
+                  }
+                >
+                  <Image source={{ uri: item.imagem }} style={styles.recipeImage} />
+                  <Text style={styles.recipeTitle}>{item.nome}</Text>
+                  <Text style={styles.recipeTime}>
+                    ⚙️{' '}
+                    {item.idDificuldade === 1
+                      ? 'Fácil'
+                      : item.idDificuldade === 2
+                      ? 'Média'
+                      : 'Difícil'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              showsHorizontalScrollIndicator={false}
+            />
+          </View>
+
+          {/* 💪 RECEITAS PROTEICAS */}
+          <View style={styles.section}>
+            <Text style={styles.subtitle}>💪 Ricas em Proteína</Text>
+            <FlatList
+              horizontal
+              data={receitasProteicas}
+              keyExtractor={(item) => item.id_receitas.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.recipeCard}
+                  onPress={() =>
+                    navigation.navigate('ReceitaDet', { id: item.id_receitas })
+                  }
+                >
+                  <Image source={{ uri: item.imagem }} style={styles.recipeImage} />
+                  <Text style={styles.recipeTitle}>{item.nome}</Text>
+                  <Text style={styles.recipeTime}>💪 Proteica</Text>
+                </TouchableOpacity>
+              )}
+              showsHorizontalScrollIndicator={false}
+            />
+          </View>
         </View>
       </ScrollView>
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>NutriChef - Dashboard</title>
-  <link rel="stylesheet" href="./css/dashboard.css">
+  <link rel="stylesheet" href="/ADM/css/dashboard.css">
   <link rel="stylesheet" href="./css/dashUsuario.css">
   <link rel="stylesheet" href="./css/dashReceitas.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -12,14 +12,14 @@
 <body>
 <div class="app">
   <aside class="sidebar card">
-    <div class="logo"><span style="color:var(--accent)">Nutri</span><span class="chef">chef</span></div>
     <nav>
+      <img src="logo.png" alt="logo">
       <a class="nav-item active" href="#" data-screen="dashboard">Dashboard</a>
       <a class="nav-item" href="#" data-screen="receitas">Receitas</a>
       <a class="nav-item" href="#" data-screen="denuncias">Denúncias</a>
       <a class="nav-item" href="#"data-screen="receitasRecebidas">Solicitação de Receitas</a>
     </nav>
-    <div style="margin-top:auto;color:var(--muted);font-size:13px">vítor • admin</div>
+    <div id="admin-info" style="margin-top:auto;color:var(--muted);font-size:13px"></div>
   </aside>
 
   <main class="main">
@@ -40,7 +40,7 @@
       <section class="card" id="screen-dashboard">
         <div class="grid">
           <div>
-            <h3 style="margin:0 0 14px 0;font-weight:700">Sites mais utilizados</h3>
+            <h3 style="margin:0 0 20px 0;font-weight:500">Sites mais utilizados</h3>
             <div class="list-card" id="sites-list"></div>
 
             <div style="height:18px"></div>
@@ -52,6 +52,7 @@
               </div>
               <div class="stat">
                 <div class="label">Comentários</div>
+                <br>
                 <div class="num" id="total-comentarios">0</div>
               </div>
               <div class="stat">
@@ -60,9 +61,8 @@
               </div>
             </div>
           </div>
-
           <aside>
-            <h4 style="margin:0 0 12px 0">Ingredientes mais procurados</h4>
+            <h3 style="margin:0 0 20px 0;font-weight:500">Ingredientes mais procurados</h3>
                <div class="card" style="padding:10px">
                 <div class="donut">
                   <!-- simple svg donut mock -->
@@ -83,10 +83,11 @@
 
           
             <!-- Card de Usuários -->
+            <br> 
             <div class="card users-card">
               <div class="users-card-header">
-                <h4>Usuários</h4>
-                <div class="meta-muted" id="users-count-inline">0</div>
+              <h4>Usuários</h4>
+              <div class="meta-muted" id="users-count-inline">0</div>
               </div>
 
               <input id="user-search" class="user-search" placeholder="Pesquisar usuários por nome..." />
@@ -136,37 +137,31 @@
           </table>
         </div>
       </section>
-
-      <!-- SOLICITAÇÃO RECEITAS -->
-      <section class="card" id="screen-receitasRecebidas" style="display:none">
-        <h3>Receitas Recebidas</h3>
-
-        <div class="receitas-top">
-          <input type="text" id="search-receita-recebida" placeholder="Pesquisar receita..." />
-        </div>
-
-        <div id="receitas-recebidas-container" class="receitas-container"></div>
-      </section>
-
-      <!-- Modal de Receitas -->
-      <div id="modal-receita" class="modal" style="display:none;">
-        <div class="modal-content">
-          <span id="fechar-modal" style="cursor:pointer;float:right;font-size:18px">&times;</span>
-          <div id="conteudo-receita"></div>
-        </div>
-      </div>
     </div>
   </main>
 </div>
 
 <script>
-(async () => {
-  const screens = ['dashboard','receitas','denuncias','receitasRecebidas'];
-  const pageTitle = document.getElementById('page-title');
+async function mostrarUsuarioLogado() {
+  try {
+    const res = await fetch('http://localhost:3000/api/usuario-logado', {
+      credentials: 'include' // se usar cookies de sessão
+    });
+    const usuario = await res.json();
 
-  let receitasRecebidas = []; // armazenar todas as receitas
-  let paginaAtual = 0;
-  const receitasPorPagina = 5;
+    if(usuario && usuario.nome){
+      document.getElementById('admin-info').textContent = `${usuario.nome} • ${usuario.tipo}`;
+    }
+  } catch(err){
+    console.error('Erro ao buscar usuário logado:', err);
+  }
+}
+
+mostrarUsuarioLogado();
+
+(async () => {
+  const screens = ['dashboard','receitas','denuncias'];
+  const pageTitle = document.getElementById('page-title');
 
   // Troca de telas
   document.querySelectorAll('.nav-item').forEach(item => {
@@ -224,106 +219,82 @@
     conteudoModal.innerHTML = `
       <h3 contenteditable="true" id="edit-nome">${receita.nome}</h3>
       <img src="${receita.imagem}" style="max-width:100%;border-radius:8px;margin-bottom:10px">
-      <p><strong>Categoria:</strong> <span contenteditable="true" id="edit-categoria">${receita.categoria}</span></p>
-      <p><strong>Origem:</strong> <span contenteditable="true" id="edit-origem">${receita.origem}</span></p>
+      <p><strong>Categoria:</strong> 
+        <select id="edit-categoria">
+          <option value="1" ${receita.idCategoria===1?'selected':''}>Bolos</option>
+          <option value="2" ${receita.idCategoria===2?'selected':''}>Massas</option>
+          <option value="3" ${receita.idCategoria===3?'selected':''}>Saladas</option>
+          <option value="4" ${receita.idCategoria===4?'selected':''}>Diversos</option>
+        </select>
+      </p>
+      <p><strong>Origem:</strong> <span contenteditable="true" id="edit-origem">${receita.origem||''}</span></p>
+      <p><strong>Tempo de preparo:</strong> <input type="number" id="edit-tempo" value="${receita.tempoPreparo||30}" /></p>
+      <p><strong>Dificuldade:</strong> 
+        <select id="edit-dificuldade">
+          <option value="1" ${receita.dificuldade===1?'selected':''}>Fácil</option>
+          <option value="2" ${receita.dificuldade===2?'selected':''}>Média</option>
+          <option value="3" ${receita.dificuldade===3?'selected':''}>Difícil</option>
+        </select>
+      </p>
       <p><strong>Ingredientes:</strong></p>
       <ul id="edit-ingredientes">
         ${receita.ingredientes.map(i => `<li contenteditable="true">${i}</li>`).join('')}
       </ul>
       <p><strong>Instruções:</strong></p>
-      <p id="edit-instrucoes" contenteditable="true">${receita.instrucoes}</p>
+      <p id="edit-instrucoes" contenteditable="true">${receita.instrucoes||receita.descricao}</p>
       <div class="modal-buttons">
         <button id="salvar-edicao" style="background:#2ecc71">💾 Salvar Alterações</button>
-        <button id="aceitar-receita">Aceitar</button>
-        <button id="rejeitar-receita">Rejeitar</button>
+        <button id="cancelar-edicao">Cancelar</button>
       </div>
     `;
+
     modal.style.display = 'flex';
 
-    // === AÇÕES ===
-    document.getElementById('salvar-edicao').onclick = () => {
-      const novosDados = {
-        nome: document.getElementById('edit-nome').innerText.trim(),
-        categoria: document.getElementById('edit-categoria').innerText.trim(),
-        origem: document.getElementById('edit-origem').innerText.trim(),
-        ingredientes: Array.from(document.querySelectorAll('#edit-ingredientes li')).map(li => li.innerText.trim()),
-        instrucoes: document.getElementById('edit-instrucoes').innerText.trim()
-      };
+    document.getElementById('cancelar-edicao').onclick = () => modal.style.display='none';
 
-      // Atualiza localmente
-      Object.assign(receita, novosDados);
-      alert('Alterações salvas localmente!');
-
-      // Salva no banco via API
-      fetch('http://localhost:3000/api/atualizar-receita', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: receita.id, // precisa vir no objeto original
-          nome: novosDados.nome,
-          categoria: novosDados.categoria,
-          origem: novosDados.origem,
-          ingredientes: novosDados.ingredientes,
-          instrucoes: novosDados.instrucoes
-        })
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            alert('Receita atualizada no banco com sucesso!');
-          } else {
-            alert('Erro: ' + data.message);
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          alert('Erro ao salvar no banco.');
-        });
-    };
-
-    document.getElementById('aceitar-receita').onclick = async () => {
+    document.getElementById('salvar-edicao').onclick = async () => {
       try {
-        const receitaSelecionada = receita; // receita do modal
+        const novosDados = {
+          nome: document.getElementById('edit-nome').innerText.trim(),
+          idCategoria: parseInt(document.getElementById('edit-categoria').value),
+          origem: document.getElementById('edit-origem').innerText.trim(),
+          tempoPreparo: parseInt(document.getElementById('edit-tempo').value),
+          dificuldade: parseInt(document.getElementById('edit-dificuldade').value),
+          ingredientes: Array.from(document.querySelectorAll('#edit-ingredientes li')).map(li => li.innerText.trim()),
+          instrucoes: document.getElementById('edit-instrucoes').innerText.trim()
+        };
 
-        const response = await fetch('http://localhost:3001/publicar', {
+        // Atualiza localmente
+        Object.assign(receita, novosDados);
+
+        // Salva no banco
+        const res = await fetch('http://localhost:3000/api/atualizar-receita', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            nome: receitaSelecionada.nome || 'Receita sem nome',
-            descricao: receitaSelecionada.instrucoes || 'Sem instruções',
-            porcoes: 1,
-            custo: 1,
-            dificuldade: 1,
-            idCategoria: 1,
-            idIngredienteBase: 1,
-            tempoPreparo: receitaSelecionada.tempo || 0,
-            ingredientes: JSON.stringify(receitaSelecionada.ingredientes || []),
-            utensilios: JSON.stringify([]),
-            passos: JSON.stringify([]),
-            info: ''
+            id: receita.id,
+            nome: novosDados.nome,
+            idCategoria: novosDados.idCategoria,
+            origem: novosDados.origem,
+            tempoPreparo: novosDados.tempoPreparo,
+            dificuldade: novosDados.dificuldade,
+            ingredientes: novosDados.ingredientes,
+            instrucoes: novosDados.instrucoes
           })
         });
 
-        const data = await response.json();
-
-        if (data.success) {
-          alert(`Receita "${receitaSelecionada.nome}" validada e salva no banco!`);
-          modal.style.display = 'none';
-          removerReceita(receitaSelecionada.nome);
+        const data = await res.json();
+        if(data.success) {
+          alert('Receita atualizada com sucesso!');
+          modal.style.display='none';
         } else {
-          alert('Erro ao salvar receita: ' + data.message);
+          alert('Erro: ' + data.message);
         }
-      } catch (err) {
+
+      } catch(err) {
         console.error(err);
-        alert('Erro ao salvar receita no servidor.');
+        alert('Erro ao atualizar receita.');
       }
-    };
-
-
-    document.getElementById('rejeitar-receita').onclick = () => {
-      alert(`Receita "${receita.nome}" rejeitada!`);
-      modal.style.display = 'none';
-      removerReceita(receita.nome);
     };
   }
 

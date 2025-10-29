@@ -18,22 +18,21 @@ export default function Categoria({ route, navigation }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const fetchReceitas = async () => {
-    try {
-      const response = await fetch(`http://localhost:3001/categoria/${nome}`);
-      const data = await response.json();
-      setReceitas(data.receitas);
-    } catch (error) {
-      console.error("Erro ao buscar receitas:", error);
-      setReceitas([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchReceitas = async () => {
+      try {
+        const response = await fetch(`http://localhost:3001/categoria/${nome}`);
+        const data = await response.json();
+        setReceitas(data.receitas);
+      } catch (error) {
+        console.error("Erro ao buscar receitas:", error);
+        setReceitas([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchReceitas();
-    }, [nome]);
-
+  }, [nome]);
 
   const renderItem = ({ item }) => (
     <TouchableOpacity 
@@ -55,46 +54,54 @@ export default function Categoria({ route, navigation }) {
   }
 
   return (
-    <ScrollView style={styles.container}>
-        <Header navigation={navigation}/>
-      <Text style={styles.title}>{nome}</Text>
-      <Text style={styles.description}>
-        Pensar em colocar uma descrição aqui, que nem no{' '}
-        <Text 
-          style={styles.link} 
-          onPress={() => window.open('https://www.tudogostoso.com.br/categorias/1091-recheio-de-bolo', '_blank')}
-        >
-          TudoGostoso
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Header navigation={navigation} />
+
+        <Text style={styles.title}>{nome}</Text>
+
+        <Text style={styles.description}>
+          Pensar em colocar uma descrição aqui, que nem no{' '}
+          <Text 
+            style={styles.link} 
+            onPress={() => window.open('https://www.tudogostoso.com.br/categorias/1091-recheio-de-bolo', '_blank')}
+          >
+            TudoGostoso
+          </Text>
         </Text>
-      </Text>
 
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Receitas Recomendadas</Text>
-      </View>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Receitas Recomendadas</Text>
+        </View>
 
-      {receitas && receitas.length > 0 ? (
-        <FlatList
-          data={receitas}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id_receitas.toString()}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.recipesList}
-        />
-      ) : (
-        <Text style={styles.semResultados}>Nenhuma receita encontrada nesta categoria.</Text>
-      )}
+        {receitas && receitas.length > 0 ? (
+          <FlatList
+            data={receitas}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id_receitas.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.recipesList}
+          />
+        ) : (
+          <Text style={styles.semResultados}>Nenhuma receita encontrada nesta categoria.</Text>
+        )}
+      </ScrollView>
 
-      <BottomNav navigation={navigation}/>
-    </ScrollView>
+    
+      <BottomNav navigation={navigation} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 15,
     backgroundColor: '#fdfdfd',
+  },
+  scrollContent: {
+    padding: 15,
+    paddingBottom: 100, 
   },
   containerCenter: {
     flex: 1,

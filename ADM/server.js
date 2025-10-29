@@ -241,37 +241,6 @@ app.get('/api/denuncias', async (req, res) => {
     }
 });
 
-// ====================================================
-// FUNÇÃO DE TRADUÇÃO — DeepL API
-// ====================================================
-async function traduzirTexto(texto, target = 'PT') {
-  if (!texto) return '';
-  try {
-    const API_KEY = '19690adc-e128-4198-bb80-7c728e4ae045:fx';
-    const url = `https://api-free.deepl.com/v2/translate`;
-
-    const params = new URLSearchParams();
-    params.append('auth_key', API_KEY);
-    params.append('text', texto);
-    params.append('target_lang', target);
-
-    const res = await fetch(url, {
-      method: 'POST',
-      body: params,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    });
-
-    const text = await res.text(); // ler como texto primeiro
-    if (!text) return texto;       // evita erro se veio vazio
-    const data = JSON.parse(text); // parse manual
-    return data.translations?.[0]?.text || texto;
-  } catch (err) {
-    console.error('Erro ao traduzir:', err);
-    return texto;
-  }
-}
 
 // ====================================================
 // ROTA: Importar receita aleatória da API TheMealDB (somente saudáveis)
@@ -349,22 +318,21 @@ app.get('/api/importar-receita', async (req, res) => {
 // ====================================================
 app.post('/api/atualizar-receita', async (req, res) => {
   try {
-    const { id, nome, categoria, origem, ingredientes, instrucoes } = req.body;
+    const { id, nome, idCategoria, origem, ingredientes, instrucoes, tempoPreparo, dificuldade } = req.body;
 
-    if (!id || !nome) {
-      return res.status(400).json({ success: false, message: 'ID e nome são obrigatórios.' });
-    }
+    if (!id || !nome) return res.status(400).json({ success: false, message: 'ID e nome são obrigatórios.' });
 
-    // Atualiza os dados principais
+    // Atualiza tabela principal
     await db.query(
-      `UPDATE receitas SET nome = ?, descricao = ?, info = ? WHERE id_receitas = ?`,
-      [nome, instrucoes, origem, id]
+      `UPDATE receitas SET nome=?, info=?, descricao=?, id_categoria=?, tempo_preparo=?, idDificuldade=? WHERE id_receitas=?`,
+      [nome, origem, instrucoes, idCategoria, tempoPreparo, dificuldade, id]
     );
 
-    // Apaga ingredientes antigos e reinsere os novos
-    await db.query(`DELETE FROM receita_ingredientes WHERE id_receitas = ?`, [id]);
+    // Remove ingredientes antigos
+    await db.query(`DELETE FROM receita_ingredientes WHERE id_receitas=?`, [id]);
 
-    for (const item of ingredientes) {
+    // Insere ingredientes atualizados
+    for(const item of ingredientes){
       await db.query(
         `INSERT INTO receita_ingredientes (id_receitas, descricao) VALUES (?, ?)`,
         [id, item]
@@ -372,8 +340,9 @@ app.post('/api/atualizar-receita', async (req, res) => {
     }
 
     res.json({ success: true, message: 'Receita atualizada com sucesso!' });
-  } catch (err) {
-    console.error('Erro ao atualizar receita:', err);
+
+  } catch(err) {
+    console.error(err);
     res.status(500).json({ success: false, message: 'Erro ao atualizar receita.' });
   }
 });

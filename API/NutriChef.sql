@@ -131,7 +131,7 @@ INSERT INTO adm (nome, senha) VALUES
 
 -- Categorias
 INSERT INTO categorias (nome) VALUES
-('Bolos'),('Massas'),('Saladas');
+('Bolos'),('Massas'),('Saladas'),('Diversos');
 
 -- Ingredientes
 INSERT INTO ingredientes (nome, tipo, custo_ingrediente) VALUES
@@ -327,6 +327,8 @@ BEGIN
 END;
 //
 
+DELIMITER //
+
 CREATE PROCEDURE spInsere_Categoria (
     IN nomeCategoria VARCHAR(100)
 )
@@ -339,6 +341,8 @@ BEGIN
 END;
 //
 
+DELIMITER //
+
 CREATE PROCEDURE spInsere_Caracteristica (
     IN descCaracteristica VARCHAR(100)
 )
@@ -346,6 +350,8 @@ BEGIN
     INSERT INTO caracteristicas (caracteristica) VALUES (descCaracteristica);
 END;
 //
+
+DELIMITER //
 
 CREATE PROCEDURE spInsere_Ingrediente (
     IN nomeIngrediente VARCHAR(100),
@@ -362,6 +368,8 @@ BEGIN
     END IF;
 END;
 //
+
+DELIMITER //
 
 CREATE PROCEDURE spInsere_Receita(
     IN p_nome VARCHAR(255),
@@ -387,6 +395,8 @@ BEGIN
     SELECT LAST_INSERT_ID() AS id_receitas;
 END;
 //
+
+DELIMITER //
 
 CREATE PROCEDURE spInsere_Adm (
     IN nomeAdm VARCHAR(100),

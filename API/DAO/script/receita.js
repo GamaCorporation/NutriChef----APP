@@ -23,11 +23,9 @@ export async function buscarTodasReceitas() {
 // ===============================
 export async function buscarReceitas(termo) {
   const conn = await conexao();
-
   try {
-    // Divide os termos por vírgula ou espaço
     const termos = termo
-      .split(/[, ]+/) // separa por vírgulas e/ou espaços
+      .split(/[, ]+/)
       .map(t => t.trim())
       .filter(t => t.length > 0);
 
@@ -36,20 +34,12 @@ export async function buscarReceitas(termo) {
       return [];
     }
 
-    // Cria as condições dinâmicas para cada termo (usando LIKE)
     const condicoes = termos
       .map(() => "(nome LIKE ? OR descricao LIKE ?)")
       .join(" OR ");
-
-    // Cria os parâmetros de busca duplicando cada termo
     const params = termos.flatMap(t => [`%${t}%`, `%${t}%`]);
 
-    const sql = `
-      SELECT id_receitas, nome, descricao
-      FROM receitas
-      WHERE ${condicoes}
-    `;
-
+    const sql = `SELECT id_receitas, nome, descricao FROM receitas WHERE ${condicoes}`;
     const [rows] = await conn.execute(sql, params);
     await conn.end();
     return rows;
@@ -94,7 +84,7 @@ export async function buscarReceitaPorId(id) {
     );
     if (receitas.length === 0) return null;
 
-    const [ingredientes] = await conn.execute(
+    const [ingredientesRaw] = await conn.execute(
       `SELECT i.nome, ri.quantidade, ri.unidade 
        FROM receita_ingredientes ri 
        JOIN ingredientes i ON i.id_ingrediente = ri.id_ingrediente 
@@ -102,7 +92,9 @@ export async function buscarReceitaPorId(id) {
       [id]
     );
 
-    const [utensilios] = await conn.execute(
+    const ingredientes = Array.isArray(ingredientesRaw) ? ingredientesRaw : [];
+
+    const [utensiliosRaw] = await conn.execute(
       `SELECT u.nome 
        FROM receita_utensilios ru 
        JOIN utensilios u ON u.id_utensilio = ru.id_utensilio 
@@ -110,10 +102,14 @@ export async function buscarReceitaPorId(id) {
       [id]
     );
 
-    const [passos] = await conn.execute(
+    const utensilios = Array.isArray(utensiliosRaw) ? utensiliosRaw : [];
+
+    const [passosRaw] = await conn.execute(
       "SELECT descricao FROM receita_passos WHERE id_receitas = ? ORDER BY ordem",
       [id]
     );
+
+    const passos = Array.isArray(passosRaw) ? passosRaw : [];
 
     await conn.end();
 
@@ -124,7 +120,7 @@ export async function buscarReceitaPorId(id) {
       autor,
       ingredientes: ingredientes.map(i => {
         const qtd = i.quantidade % 1 === 0 ? i.quantidade : i.quantidade.toFixed(2);
-        return `${qtd} ${i.unidade} ${i.nome}`;
+        return `${qtd} ${i.unidade || ""} ${i.nome}`;
       }),
       utensilios: utensilios.map(u => u.nome),
       passos: passos.map(p => p.descricao)
@@ -137,7 +133,7 @@ export async function buscarReceitaPorId(id) {
 }
 
 // ===============================
-// 📋 BUSCAR CATEGORIAS E INGREDIENTES (Formulário)
+// 📋 BUSCAR CATEGORIAS (Formulário)
 // ===============================
 export async function buscarCategoriasForm() {
   const conn = await conexao();
@@ -152,6 +148,9 @@ export async function buscarCategoriasForm() {
   }
 }
 
+// ===============================
+// 📋 BUSCAR INGREDIENTES (Formulário)
+// ===============================
 export async function buscarIngredientesForm() {
   const conn = await conexao();
   try {
@@ -166,49 +165,50 @@ export async function buscarIngredientesForm() {
 }
 
 // ===============================
-// ⚡ INCLUIR RECEITA 
+// 🍳 INCLUIR RECEITA
 // ===============================
 export async function incluirReceita(dados) {
   const {
-    nome, descricao, porcoes, custo, dificuldade, idCategoria = 1,
-    idIngredienteBase = 1, tempoPreparo, imagem = "default.jpg"
+    nome,
+    descricao,
+    porcoes = 1,
+    custo_aproximado = 0,
+    dificuldade = 1,
+    idCategoria = 1,
+    idIngredienteBase = null,
+    tempoPreparo = 30,
+    imagem = "default.jpg",
   } = dados;
 
-  const sql = `CALL spInsere_Receita(?, ?, ?, ?, ?, ?, ?, ?, ?)`;
   const conn = await conexao();
-
   try {
-    const [results] = await conn.query(sql, [
-      nome, descricao, porcoes, custo, dificuldade,
+    const sql = `INSERT INTO receitas 
+      (nome, descricao, porcoes, custo_aproximado, idDificuldade, id_categoria, id_ingrediente_base, tempo_preparo, imagem)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const [result] = await conn.execute(sql, [
+      nome, descricao, porcoes, custo_aproximado, dificuldade,
       idCategoria, idIngredienteBase, tempoPreparo, imagem
     ]);
 
-    if (!results || !results[0] || !results[0][0]) {
-      throw new Error("Procedure não retornou o ID da nova receita");
-    }
-
-    const idNovaReceita = results[0][0].id_receitas;
     await conn.end();
-    return idNovaReceita;
+    return result.insertId;
   } catch (err) {
     await conn.end();
     throw new Error(err.sqlMessage || err.message);
   }
 }
 
-// Inserir Ingredientes (id_ingrediente, quantidade, unidade)
+// Inserir ingredientes
 export async function inserirIngredientes(idReceita, ingredientes) {
   const conn = await conexao();
   try {
-    for (const item of ingredientes) {
+    const listaIngredientes = Array.isArray(ingredientes) ? ingredientes : [];
+    for (const item of listaIngredientes.filter(i => i && i.id_ingrediente)) {
+      const quantidadeNum = parseFloat(item.quantidade) || 0;
       await conn.execute(
-        `INSERT INTO receita_ingredientes (id_receitas, id_ingrediente, quantidade, unidade) VALUES (?, ?, ?, ?)`,
-        [
-          idReceita,
-          item.id_ingrediente ?? null,
-          item.quantidade ?? null,
-          item.unidade ?? null
-        ]
+        `INSERT INTO receita_ingredientes (id_receitas, id_ingrediente, quantidade, unidade) 
+         VALUES (?, ?, ?, ?)`,
+        [idReceita, item.id_ingrediente, quantidadeNum, item.unidade || null]
       );
     }
     await conn.end();
@@ -218,14 +218,15 @@ export async function inserirIngredientes(idReceita, ingredientes) {
   }
 }
 
-// Inserir Utensílios
+// Inserir utensílios
 export async function inserirUtensilios(idReceita, utensilios) {
   const conn = await conexao();
   try {
-    for (const u of utensilios) {
+    const listaUtensilios = Array.isArray(utensilios) ? utensilios : [];
+    for (const u of listaUtensilios) {
       await conn.execute(
         `INSERT INTO receita_utensilios (id_receitas, id_utensilio) VALUES (?, ?)`,
-        [idReceita, u] // u = id_utensilio
+        [idReceita, u]
       );
     }
     await conn.end();
@@ -235,14 +236,15 @@ export async function inserirUtensilios(idReceita, utensilios) {
   }
 }
 
-// Inserir Passos
+// Inserir passos
 export async function inserirPassos(idReceita, passos) {
   const conn = await conexao();
   try {
-    for (let i = 0; i < passos.length; i++) {
+    const listaPassos = Array.isArray(passos) ? passos : [];
+    for (let i = 0; i < listaPassos.length; i++) {
       await conn.execute(
         `INSERT INTO receita_passos (id_receitas, descricao, ordem) VALUES (?, ?, ?)`,
-        [idReceita, passos[i], i + 1]
+        [idReceita, listaPassos[i], i + 1]
       );
     }
     await conn.end();
@@ -251,4 +253,3 @@ export async function inserirPassos(idReceita, passos) {
     throw err;
   }
 }
-
