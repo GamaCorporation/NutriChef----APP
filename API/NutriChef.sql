@@ -108,9 +108,12 @@ CREATE TABLE IF NOT EXISTS avaliacoes (
     nota INT,
     comentario TEXT,
     data DATE,
+    status VARCHAR (30) DEFAULT 'Pendente',
     FOREIGN KEY (id_usuarios) REFERENCES usuarios(id_usuarios),
     FOREIGN KEY (id_receitas) REFERENCES receitas(id_receitas)
 );
+
+
 
 -- ========================================
 -- INSERTS DE TESTE
@@ -327,8 +330,6 @@ BEGIN
 END;
 //
 
-DELIMITER //
-
 CREATE PROCEDURE spInsere_Categoria (
     IN nomeCategoria VARCHAR(100)
 )
@@ -341,8 +342,6 @@ BEGIN
 END;
 //
 
-DELIMITER //
-
 CREATE PROCEDURE spInsere_Caracteristica (
     IN descCaracteristica VARCHAR(100)
 )
@@ -350,8 +349,6 @@ BEGIN
     INSERT INTO caracteristicas (caracteristica) VALUES (descCaracteristica);
 END;
 //
-
-DELIMITER //
 
 CREATE PROCEDURE spInsere_Ingrediente (
     IN nomeIngrediente VARCHAR(100),
@@ -368,8 +365,6 @@ BEGIN
     END IF;
 END;
 //
-
-DELIMITER //
 
 CREATE PROCEDURE spInsere_Receita(
     IN p_nome VARCHAR(255),
@@ -396,8 +391,6 @@ BEGIN
 END;
 //
 
-DELIMITER //
-
 CREATE PROCEDURE spInsere_Adm (
     IN nomeAdm VARCHAR(100),
     IN senhaAdm VARCHAR(255)
@@ -412,3 +405,5 @@ END;
 //
 
 DELIMITER ;
+
+select*from receitas

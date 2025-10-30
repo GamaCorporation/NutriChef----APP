@@ -24,23 +24,21 @@
 
     .app{
       max-width:1200px;
-      margin:40px auto;
+      margin:28px auto;
       display:flex;
-      gap: 15px;
+      gap:24px;
     }
 
     /* SIDEBAR */
     .sidebar{
-      width:300px;
-      height: auto;
+      width:220px;
       background:linear-gradient(180deg,#fff,#fff);
-      border-radius:20px;
-      padding:20px 20px;
-      margin-right:auto;
+      border-radius:16px;
+      padding:28px 20px;
       box-shadow:var(--shadow);
       display:flex;
       flex-direction:column;
-      gap:10px;
+      gap:18px;
       align-items:flex-start;
     }
 
@@ -54,7 +52,7 @@
       display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;color:#7b8794;text-decoration:none;font-weight:600;
     }
     .nav-item svg{opacity:0.7}
-    .nav-item.active{background:linear-gradient(90deg, rgba(204, 104, 11, 0.12), rgba(80, 44, 10, 0.06));color:var(--accent);}
+    .nav-item.active{background:linear-gradient(90deg, rgba(255,122,0,0.12), rgba(255,122,0,0.06));color:var(--accent);}
 
     /* MAIN CARD */
     .main{
@@ -90,10 +88,9 @@
     .avatar-sm{width:44px;height:44px;border-radius:50%;background:linear-gradient(180deg,#fef2e6,#ffd8b3);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
 
     .stats{display:flex;gap:12px}
-    .stat{flex:1;padding:10px;border-radius:16px;border:2px solid var(--soft-border);
-    background:linear-gradient(180deg,#fff,#fbfbfb)}
-    .stat .num{font-size:20px;font-weight:600}
-    .stat .label{color:#ff7a00;font-weight:600}
+    .stat{flex:1;padding:14px;border-radius:12px;border:1px solid var(--soft-border);background:linear-gradient(180deg,#fff,#fbfbfb)}
+    .stat .num{font-size:20px;font-weight:700}
+    .stat .label{color:var(--muted);font-weight:600}
 
     /* donut mock */
     .donut{height:160px;display:flex;align-items:center;justify-content:center}

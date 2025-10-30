@@ -1,25 +1,24 @@
 <!-- Tela LOGIN -->
-  <div id="login-screen" class="screen">
-    <button class="back-button" onclick="voltarParaWelcome()">←</button>
-    <h1 style="color: #FF6300;margin-bottom: 20px;">Entrar como Administrador</h1>
-    
-    <form id="login-form">
-        <div class="form-group">
-            <input type="text" id="login-nome" placeholder="Nome" required>
-            <div class="error-message" id="login-nome-error"></div>
-        </div>
+<div id="login-screen" class="screen">
+  <button class="back-button" onclick="voltarParaWelcome()">←</button>
+  <h1 style="color: #FF6300;margin-bottom: 20px;">Entrar como Administrador</h1>
+  
+  <form id="login-form">
+      <div class="form-group">
+          <input type="text" id="login-nome" placeholder="Nome" required>
+          <div class="error-message" id="login-nome-error"></div>
+      </div>
 
-        <div class="form-group">
-            <input type="password" id="login-password" placeholder="Senha" required>
-            <div class="error-message" id="login-password-error"></div>
-        </div>
+      <div class="form-group">
+          <input type="password" id="login-password" placeholder="Senha" required>
+          <div class="error-message" id="login-password-error"></div>
+      </div>
 
-        <button type="submit" class="button-login" style="margin-bottom: 10px;">Entrar</button>
-        <a href="/cadastro.html" style="color: #FF6300;text-decoration: none">Criar uma conta</a>
-    </form>
-    
-    <div class="msg" id="login-msg"></div>
-  </div>
+      <button type="submit" class="button-login" style="margin-bottom: 10px;">Entrar</button>
+  </form>
+  
+  <div class="msg" id="login-msg"></div>
+</div>
 </div>
 
 <script src="script.js"></script>
@@ -28,158 +27,158 @@
 
 <style>
 
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-    /* ==== Estilo geral ==== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+  /* ==== Estilo geral ==== */
 body {
-  font-family: "Poppins", sans-serif;
-  color: #ffffff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
+font-family: "Poppins", sans-serif;
+color: #ffffff;
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100vh;
+margin: 0;
 }
 
 /* ==== Container principal ==== */
 #login-screen {
-  background: #ffffff;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  width: 450px;
-  padding: 40px 30px;
-  text-align: center;
-  position: relative;
-  animation: fadeIn 0.6s ease;
+background: #ffffff;
+border-radius: 15px;
+box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+width: 450px;
+padding: 40px 30px;
+text-align: center;
+position: relative;
+animation: fadeIn 0.6s ease;
 }
 
 /* ==== Botão de voltar ==== */
 .back-button {
-  position: absolute;
-  left: 20px;
-  top: 20px;
-  background: none;
-  border: none;
-  color: #FF6300;
-  font-size: 22px;
-  cursor: pointer;
-  transition: 0.2s;
+position: absolute;
+left: 20px;
+top: 20px;
+background: none;
+border: none;
+color: #FF6300;
+font-size: 22px;
+cursor: pointer;
+transition: 0.2s;
 }
 .back-button:hover {
-  color: #FF6300;
+color: #FF6300;
 }
 
 /* ==== Título e subtítulo ==== */
 #login-screen h1 {
-  font-size: 1.5em;
-  margin-bottom: 5px;
-  color: #FF6300;
+font-size: 1.5em;
+margin-bottom: 5px;
+color: #FF6300;
 }
 #login-screen p {
-  font-size: 0.95em;
-  color: #000000;
-  margin-bottom: 25px;
-  font-weight: 500;
+font-size: 0.95em;
+color: #000000;
+margin-bottom: 25px;
+font-weight: 500;
 }
 
 /* ==== Formulário ==== */
 .form-group {
-  margin-bottom: 20px;
-  position: relative;
+margin-bottom: 20px;
+position: relative;
 }
 input[type="text"],
 input[type="password"] {
-  width: 100%;
-  padding: 12px 15px;
-  border: none;
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
-  border-radius: 8px;
-  background: #F6F6F6;
-  color: #000000;
-  font-size: 15px;
-  outline: none;
-  transition: 0.3s;
+width: 100%;
+padding: 12px 15px;
+border: none;
+font-family: "Poppins", sans-serif;
+font-weight: 500;
+border-radius: 8px;
+background: #F6F6F6;
+color: #000000;
+font-size: 15px;
+outline: none;
+transition: 0.3s;
 }
 input:focus {
-  background: #F6F6F6;
-  box-shadow: 0 0 0 2px #FF6300;
+background: #F6F6F6;
+box-shadow: 0 0 0 2px #FF6300;
 }
 .error-message {
-  font-size: 13px;
-  color: #FF6300;
-  margin-top: 5px;
+font-size: 13px;
+color: #FF6300;
+margin-top: 5px;
 }
 
 /* ==== Mostrar senha ==== */
 .toggle-password {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #999;
-  cursor: pointer;
-  transition: 0.2s;
+position: absolute;
+right: 15px;
+top: 50%;
+transform: translateY(-50%);
+color: #999;
+cursor: pointer;
+transition: 0.2s;
 }
 .toggle-password:hover {
-  color: #FF6300;
+color: #FF6300;
 }
 
 /* ==== Link Esqueci senha ==== */
 .forgot-password {
-  display: block;
-  text-align: right;
-  margin: 10px 0 20px;
-  color: #FF6300;
-  text-decoration: none;
-  font-size: 0.9em;
+display: block;
+text-align: right;
+margin: 10px 0 20px;
+color: #FF6300;
+text-decoration: none;
+font-size: 0.9em;
 }
 .forgot-password:hover {
-  text-decoration: underline;
+text-decoration: underline;
 }
 
 /* ==== Botão Entrar ==== */
 .button-login {
-  width: 100%;
-  padding: 12px;
-  background: #FF6300;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 1em;
-  font-weight: bold;
-  font-family: "Poppins", sans-serif;
-  cursor: pointer;
-  transition: 0.3s;
+width: 100%;
+padding: 12px;
+background: #FF6300;
+color: #fff;
+border: none;
+border-radius: 8px;
+font-size: 1em;
+font-weight: bold;
+font-family: "Poppins", sans-serif;
+cursor: pointer;
+transition: 0.3s;
 }
 .button-login:hover {
-  background: #FF6300;
-  transform: scale(1.03);
+background: #FF6300;
+transform: scale(1.03);
 }
 
 /* ==== Mensagem abaixo ==== */
 #login-msg {
-  margin-top: 15px;
-  font-weight: 500;
+margin-top: 15px;
+font-weight: 500;
 }
 
 /* ==== Animação suave ==== */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+from {
+  opacity: 0;
+  transform: translateY(-15px);
+}
+to {
+  opacity: 1;
+  transform: translateY(0);
+}
 }
 
 /* ==== Responsividade ==== */
 @media (max-width: 400px) {
-  #login-screen {
-    width: 90%;
-    padding: 30px 20px;
-  }
+#login-screen {
+  width: 90%;
+  padding: 30px 20px;
+}
 }
 
 </style>

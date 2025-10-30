@@ -77,6 +77,10 @@ CREATE TABLE IF NOT EXISTS receita_ingredientes (
     FOREIGN KEY (id_receitas) REFERENCES receitas(id_receitas)
 );
 
+ALTER TABLE receita_ingredientes 
+MODIFY quantidade VARCHAR(50);
+
+
 CREATE TABLE IF NOT EXISTS receita_utensilios (
     id_receitas INT,
     id_utensilio INT,
@@ -111,6 +115,10 @@ CREATE TABLE IF NOT EXISTS avaliacoes (
     FOREIGN KEY (id_usuarios) REFERENCES usuarios(id_usuarios),
     FOREIGN KEY (id_receitas) REFERENCES receitas(id_receitas)
 );
+
+select * from avaliacoes;
+
+ALTER TABLE avaliacoes ADD COLUMN status VARCHAR(30) DEFAULT 'Pendente';
 
 -- ========================================
 -- INSERTS DE TESTE
